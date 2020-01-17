@@ -14,8 +14,8 @@ import time
 import xml.etree.ElementTree as ET
 
 # CSV and Nessus headers
-csvHeaders = ['CVSS Score', 'IP', 'FQDN', 'OS', 'Port', 'Vulnerability', 'Risk', 'Description', 'Exploit Available', 'Proof', 'Solution', 'See Also', 'CVE'] #headers for the CSV
-nessusFields = ['cvss_base_score', 'host-ip', 'host-fqdn', 'operating-system', 'port', 'plugin_name', 'risk_factor', 'description', 'exploit_available', 'plugin_output', 'solution', 'see_also', 'cve'] # headers of the nessus file. These are pulled from the XML. Order here must match up to the CSV headers you want for each item.
+csvHeaders = ['CVSS Score', 'IP', 'FQDN', 'OS', 'Port', 'Vulnerability', 'Risk', 'Description', 'Exploit Available', 'Proof', 'Solution', 'See Also', 'CVE', 'Plugin ID'] #headers for the CSV
+nessusFields = ['cvss_base_score', 'host-ip', 'host-fqdn', 'operating-system', 'port', 'plugin_name', 'risk_factor', 'description', 'exploit_available', 'plugin_output', 'solution', 'see_also', 'cve', 'pluginID'] # headers of the nessus file. These are pulled from the XML. Order here must match up to the CSV headers you want for each item.
 
 # Create output CSV file
 def createCSV(nessus_file):
@@ -49,10 +49,11 @@ def handleReport(report):
         if item.tag == 'HostProperties':
             for tag in (tag for tag in item if tag.attrib['name'] in nessusFields):
                 reportHost[getKey(tag.attrib['name'])] = getValue(tag.text)
-        if item.tag == 'ReportItem':
+        if item.tag == 'ReportItem': # this will parse out items that are in the tag <Report item>
             reportRow = dict(reportHost)
             reportRow['Port'] = item.attrib['port']
             reportRow['Vulnerability'] = item.attrib['pluginName']
+            reportRow['Plugin ID'] = item.attrib['pluginID']
             for tag in (tag for tag in item if tag.tag in nessusFields):
                 reportRow[getKey(tag.tag)] = getValue(tag.text)
             # Clean up - Mike G
